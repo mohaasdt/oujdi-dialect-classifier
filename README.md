@@ -1,121 +1,94 @@
 # Oujdi Dialect Classifier
 
-An end-to-end Natural Language Processing system that classifies short text as either Oujdi, the dialect spoken in Eastern Morocco, or general Moroccan Darija.
-
-The project compares classical machine learning, deep learning, and transformer-based approaches, then exposes the best-performing model through a Flask API and a React interface.
+An end-to-end NLP system that classifies short text as either **Oujdi**, the dialect spoken in Eastern Morocco, or **general Moroccan Darija**. The project compares classical machine learning, deep learning, and transformer-based approaches, then exposes the selected model through a Flask API and React interface.
 
 ![Project pipeline](report_figures/figure_01_pipeline.png)
 
-## Project Overview
+## Architecture
 
-Moroccan Darija contains significant regional variation, but most available NLP resources treat it as a single language variety. This project addresses that limitation by building a binary classifier for distinguishing Oujdi text from general Moroccan Darija in both Arabic and Latin scripts.
+![Oujdi Dialect Classifier architecture](docs/architecture.svg)
+
+The project separates corpus preparation, model experimentation, inference, and the user interface. Three model families were evaluated under the same binary-classification objective before the transformer-based configuration was selected for the application path.
+
+## Project overview
+
+Moroccan Darija contains important regional variation, while many NLP resources treat it as one broad language variety. This project explores that limitation by distinguishing Oujdi text from general Moroccan Darija across Arabic, Latin, and mixed scripts.
 
 The system includes:
 
-* Data preparation and text cleaning
-* Script detection for Arabic, Latin, and mixed text
-* TF-IDF and Logistic Regression baseline
-* Bidirectional LSTM model
-* Multilingual DistilBERT fine-tuned with LoRA
-* Flask prediction API
-* React classification interface
-* Evaluation reports and research visualizations
+- data preparation and text cleaning;
+- Arabic/Latin/mixed-script detection;
+- TF-IDF + Logistic Regression baseline;
+- Bidirectional LSTM model;
+- multilingual DistilBERT fine-tuned with LoRA;
+- Flask prediction API;
+- React classification interface;
+- evaluation reports and research visualizations.
 
 ## Dataset
 
-The final dataset contains 100,000 balanced text samples:
+The final classification dataset contains **100,000 balanced samples**:
 
-| Class           | Samples |
-| --------------- | ------: |
-| Oujdi           |  50,000 |
-| Moroccan Darija |  50,000 |
-| Total           | 100,000 |
+| Class | Samples |
+|---|---:|
+| Oujdi | 50,000 |
+| Moroccan Darija | 50,000 |
+| **Total** | **100,000** |
 
-The dataset supports Arabic, Latin, and mixed-script text.
+The Moroccan Darija portion was prepared from the Darija Open Dataset. The Oujdi portion was prepared from a larger 220,000-line corpus created by the project team.
 
-The Moroccan Darija samples were prepared from the [Darija Open Dataset](https://github.com/darija-open-dataset/dataset). The Oujdi samples were prepared from a 220,000-line corpus created by the project team.
+## Model results
 
-## Model Results
+| Model | Test accuracy |
+|---|---:|
+| TF-IDF + Logistic Regression | 93.40% |
+| Bidirectional LSTM | 95.20% |
+| **DistilBERT + LoRA** | **97.59%** |
 
-The models were evaluated using the same balanced training, validation, and test strategy.
+The DistilBERT + LoRA configuration produced the strongest reported test accuracy in the project experiments.
 
-| Model                          | Test Accuracy |
-| ------------------------------ | ------------: |
-| TF-IDF and Logistic Regression |        93.40% |
-| Bidirectional LSTM             |        95.20% |
-| DistilBERT with LoRA           |        97.59% |
+## Technology stack
 
-The DistilBERT and LoRA configuration produced the best overall result.
+- **Languages:** Python, JavaScript
+- **Machine Learning:** Scikit-learn, TensorFlow, PyTorch
+- **NLP:** Hugging Face Transformers, PEFT, LoRA
+- **Backend:** Flask, Flask-CORS
+- **Frontend:** React, Vite
+- **Data:** Pandas, NumPy
+- **Visualization:** Matplotlib, Seaborn
 
-## Architecture
-
-```mermaid
-flowchart TD
-    A[Darija and Oujdi corpora] --> B[Cleaning and script detection]
-    B --> C[Balanced dataset]
-    C --> D[TF-IDF baseline]
-    C --> E[Bidirectional LSTM]
-    C --> F[DistilBERT with LoRA]
-    F --> G[Flask API]
-    G --> H[React interface]
-```
-
-## Technology Stack
-
-* **Languages:** Python and JavaScript
-* **Machine Learning:** Scikit-learn, TensorFlow, PyTorch
-* **NLP:** Hugging Face Transformers, PEFT, LoRA
-* **Backend:** Flask and Flask-CORS
-* **Frontend:** React and Vite
-* **Data Processing:** Pandas and NumPy
-* **Visualization:** Matplotlib and Seaborn
-
-## Repository Structure
+## Repository structure
 
 ```text
 .
-├── data/                  # Prepared classification dataset
-├── frontend/              # React and Vite interface
-├── models/                # Trained models and tokenizer files
-├── src/                   # Training, evaluation, and API scripts
-├── report_figures/        # Main research figures
-├── advanced_figures/      # Additional evaluation figures
-└── RAPPORT_PROJECT_DL.pdf # Full research report
+├── data/                  # prepared classification dataset
+├── frontend/              # React/Vite interface
+├── models/                # trained models and tokenizer files
+├── src/                   # training, evaluation and API scripts
+├── report_figures/        # main research figures
+├── advanced_figures/      # additional evaluation figures
+├── docs/                  # architecture documentation
+└── RAPPORT_PROJECT_DL.pdf # full academic report
 ```
 
-## Local Setup
+## Local setup
 
 ### Backend
-
-Create and activate a virtual environment:
 
 ```bash
 python -m venv .venv
 ```
 
-On Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-Install the Python dependencies:
+Activate the environment, then:
 
 ```bash
 pip install -r requirements.txt
-```
-
-Start the Flask API:
-
-```bash
 python src/api.py
 ```
 
-The API runs locally at `http://127.0.0.1:5001`.
+The API runs at `http://127.0.0.1:5001`.
 
 ### Frontend
-
-Open another terminal:
 
 ```bash
 cd frontend
@@ -123,21 +96,11 @@ npm install
 npm run dev
 ```
 
-Open the local address displayed by Vite.
+## API endpoints
 
-## API Endpoints
-
-### Health Check
-
-```http
-GET /health
-```
-
-### Classify Text
-
-```http
+```text
+GET  /health
 POST /classify
-Content-Type: application/json
 ```
 
 Example request:
@@ -148,35 +111,34 @@ Example request:
 }
 ```
 
-The response includes the predicted label, confidence score, and probability for each class.
+The response includes the predicted class, confidence, and class probabilities.
 
-## My Contributions
+## Contributions
 
-My contributions to the project included:
+Chaima Menouar's contributions included:
 
-* Preparing and cleaning the dataset
-* Training and evaluating the machine learning and deep learning models
-* Developing the Flask backend API
-* Developing the React user interface
-* Producing the research report and evaluation figures
+- dataset preparation and cleaning;
+- model training and evaluation;
+- Flask backend development;
+- React interface development;
+- research report and evaluation figures.
 
 ## Team
 
-Developed by Chaima Menouar and Mohammed Oulhadj under the supervision of Prof. Mohamed Cherradi.
+Developed by **Chaima Menouar** and **Mohammed Oulhadj** under the supervision of **Prof. Mohamed Cherradi**.
 
-## Research Report
+## Research report
 
-The complete methodology, experiments, evaluation results, and limitations are available in the [project report](RAPPORT_PROJECT_DL.pdf).
+The complete methodology, experiments, results, and discussion are available in [`RAPPORT_PROJECT_DL.pdf`](RAPPORT_PROJECT_DL.pdf).
 
-## Data Attribution
+## Data attribution
 
-The Moroccan Darija portion is derived from the Darija Open Dataset and is subject to its [CC BY-NC 4.0 license](https://github.com/darija-open-dataset/dataset/blob/main/LICENSE).
-
-The Oujdi corpus was created by the project team. Contact the project authors before reusing or redistributing this corpus.
+The Moroccan Darija portion is derived from the Darija Open Dataset and remains subject to its CC BY-NC 4.0 license. The Oujdi corpus was created by the project team; contact the authors before reuse or redistribution.
 
 ## Limitations
 
-* The current system performs binary classification only.
-* Predictions may be less reliable for very short or ambiguous text.
-* Regional dialects can overlap significantly in vocabulary and spelling.
-* The current version is intended for research and educational use.
+- binary classification only;
+- very short or ambiguous text can be difficult to classify reliably;
+- regional dialect boundaries overlap in vocabulary and spelling;
+- reported results describe the project dataset and should not be interpreted as universal dialect-recognition accuracy;
+- the project is intended for research and educational use.
